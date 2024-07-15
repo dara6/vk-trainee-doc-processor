@@ -40,13 +40,14 @@ func (repo *InMemoryRepository) SaveDocument(doc *model.Document) error {
 
 func (repo *InMemoryRepository) LockDocument(url string) error {
 	repo.conditionMutex.Lock()
-	defer repo.conditionMutex.Unlock()
 
 	mutex, exists := repo.condition[url]
 	if !exists {
 		mutex = &sync.Mutex{}
 		repo.condition[url] = mutex
 	}
+
+	repo.conditionMutex.Unlock()
 
 	mutex.Lock()
 	return nil

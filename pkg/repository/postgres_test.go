@@ -1,24 +1,54 @@
 package repository_test
 
 import (
+	"log"
+	"os"
 	"sync"
 	"testing"
 	"time"
 	"vk/pkg/model"
 	"vk/pkg/repository"
+	"vk/internal/config"
 
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInMemoryRepository(t *testing.T) {
-	repo := repository.NewInMemoryRepository()
+var repo *repository.PostgresRepository
 
+func TestMain(m *testing.M) {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+	 log.Fatalf("Error loading config: %v", err)
+	}
+   
+	dsn := "user=" + cfg.PostgresUser + " password=" + cfg.PostgresPassword +
+	 " dbname=" + cfg.PostgresDB + " sslmode=disable" +
+	 " host=" + cfg.PostgresHost + " port=" + cfg.PostgresPort 
+
+	db, err := sqlx.Connect("postgres", dsn)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	db.MustExec("TRUNCATE TABLE documents")
+
+	repo = repository.NewPostgresRepository(db)
+
+	code := m.Run()
+
+	db.MustExec("TRUNCATE TABLE documents")
+	os.Exit(code)
+}
+
+func TestPostgresRepository(t *testing.T) {
 	doc := &model.Document{
 		Url:            "http://example.com",
-		PubDate:        123456789,
-		FetchTime:      12346789,
-		Text:           "12346789",
-		FirstFetchTime: 12346789,
+		PubDate:        uint64(time.Now().Unix()),
+		FetchTime:      uint64(time.Now().Unix()),
+		Text:           "example content",
+		FirstFetchTime: uint64(time.Now().Unix()),
 	}
 
 	t.Run("SaveDocument", func(t *testing.T) {
@@ -27,13 +57,13 @@ func TestInMemoryRepository(t *testing.T) {
 
 		savedDoc, err := repo.GetDocument(doc.Url)
 		assert.NoError(t, err, "expected no error getting document")
-		assert.Equal(t, doc, savedDoc, "expected to get the saved document")
+		assert.Equal(t, doc, savedDoc)
 	})
 
 	t.Run("GetDocument_NotFound", func(t *testing.T) {
 		_, err := repo.GetDocument("http://notfound.com")
 		assert.Error(t, err, "expected error for not found document")
-		assert.Equal(t, "document not found", err.Error(), "expected 'document not found' error")
+		assert.Equal(t, repository.ErrDocumentNotFound, err, "expected 'document not found' error")
 	})
 
 	t.Run("LockDocument", func(t *testing.T) {
@@ -72,7 +102,7 @@ func TestInMemoryRepository(t *testing.T) {
 
 	t.Run("UnlockDocument_NotFound", func(t *testing.T) {
 		err := repo.UnlockDocument("http://notfound.com")
-		assert.Error(t, err, "expected error unlocking not found document")
-		assert.Equal(t, "document not found", err.Error(), "expected 'document not found' error")
+		// Since we use PostgreSQL advisory locks, unlocking a non-existing document does not raise an error.
+		assert.NoError(t, err, "expected no error unlocking not found document")
 	})
 }

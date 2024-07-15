@@ -1,9 +1,9 @@
 package model
 
 type Document struct {
-	Url            string `json:"Url,omitempty"`                        
-	PubDate        uint64 `json:"PubDate,omitempty"`               
-	FetchTime      uint64 `json:"FetchTime,omitempty"`          
-	Text           string `json:"Text,omitempty"`                      
-	FirstFetchTime uint64 `json:"FirstFetchTime,omitempty"`
+	Url            string `db:"url"`
+	PubDate        uint64 `db:"pub_date" `
+	FetchTime      uint64 `db:"fetch_time"`
+	Text           string `db:"text"`
+	FirstFetchTime uint64 `db:"first_fetch_time"`
 }
