@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+
 	"vk/pkg/model"
 
 	"github.com/jmoiron/sqlx"

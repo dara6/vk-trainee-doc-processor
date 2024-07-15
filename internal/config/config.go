@@ -10,6 +10,11 @@ type Config struct {
 	PostgresDB       string
 	PostgresHost     string
 	PostgresPort     string
+
+	KafkaBrokerHost string
+	KafkaBrokerPort string
+	KafkaInTopic    string
+	KafkaOutTopic   string
 }
 
 func LoadConfig() (*Config, error) {
@@ -19,6 +24,11 @@ func LoadConfig() (*Config, error) {
 		PostgresDB:       getEnv("POSTGRES_DB", ""),
 		PostgresHost:     getEnv("POSTGRES_HOST", ""),
 		PostgresPort:     getEnv("POSTGRES_PORT", ""),
+
+		KafkaBrokerHost: getEnv("KAFKA_BROKER_HOST", ""),
+		KafkaBrokerPort: getEnv("KAFKA_BROKER_PORT", ""),
+		KafkaInTopic:    getEnv("KAFKA_IN_TOPIC", ""),
+		KafkaOutTopic:   getEnv("KAFKA_OUT_TOPIC", ""),
 	}
 	return config, nil
 }

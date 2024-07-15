@@ -2,6 +2,7 @@ package processor
 
 import (
 	"errors"
+
 	"vk/pkg/model"
 	"vk/pkg/repository"
 )

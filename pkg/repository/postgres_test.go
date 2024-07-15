@@ -6,11 +6,13 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"vk/internal/config"
 	"vk/pkg/model"
 	"vk/pkg/repository"
-	"vk/internal/config"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,14 +20,19 @@ import (
 var repo *repository.PostgresRepository
 
 func TestMain(m *testing.M) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
-	 log.Fatalf("Error loading config: %v", err)
+		log.Fatalf("Error loading config: %v", err)
 	}
-   
+
 	dsn := "user=" + cfg.PostgresUser + " password=" + cfg.PostgresPassword +
-	 " dbname=" + cfg.PostgresDB + " sslmode=disable" +
-	 " host=" + cfg.PostgresHost + " port=" + cfg.PostgresPort 
+		" dbname=" + cfg.PostgresDB + " sslmode=disable" +
+		" host=" + cfg.PostgresHost + " port=" + cfg.PostgresPort
 
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {

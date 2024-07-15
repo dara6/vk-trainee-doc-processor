@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "pkg/proto";
+
+message TDocument {
+    string Url = 1;
+    uint64 PubDate = 2;
+    uint64 FetchTime = 3;
+    string Text = 4;
+    uint64 FirstFetchTime = 5;
+}

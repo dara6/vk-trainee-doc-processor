@@ -4,6 +4,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+
 	"vk/pkg/model"
 	"vk/pkg/repository"
 
